@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>แบบฟอร์ม EHS Audit</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f7f5;--card:#fff;--tx:#1b2a22;--mu:#5f7068;--bd:#d5ded9;--ac:#1f7a4d;--ok:#1f7a4d;--no:#c0392b;--na:#7b8794}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a16;--card:#1b2620;--tx:#e6efe9;--mu:#9fb2a8;--bd:#2f3f36;--ac:#3fb67c;--ok:#3fb67c;--no:#ef6b5b;--na:#8b97a3}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:'Sarabun',sans-serif;font-size:16px;line-height:1.5}
+main{max-width:820px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:13px;color:var(--mu);margin:8px 0 2px}
+input,select,textarea{width:100%;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:560px){.g{grid-template-columns:1fr}}
+h2{font-size:17px;margin:16px 0 8px;color:var(--ac)}
+.it{font-weight:600}
+.rs{display:flex;gap:6px;margin:8px 0;flex-wrap:wrap}
+.rs button{flex:1;min-width:80px;padding:8px;border:1.5px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:8px;font:inherit;cursor:pointer}
+.rs button.on[data-v=pass]{background:var(--ok);border-color:var(--ok);color:#fff}
+.rs button.on[data-v=fail]{background:var(--no);border-color:var(--no);color:#fff}
+.rs button.on[data-v=na]{background:var(--na);border-color:var(--na);color:#fff}
+.ph{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ph div{position:relative}
+.ph img{width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--bd)}
+.ph .x{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;border:0;background:var(--no);color:#fff;cursor:pointer;line-height:1}
+.btn{padding:10px 14px;border:0;border-radius:8px;background:var(--ac);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn.s{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.fl{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border:1px dashed var(--ac);color:var(--ac);border-radius:8px;cursor:pointer;font-size:14px}
+.fl input{display:none}
+.sum{display:flex;gap:10px;flex-wrap:wrap;font-weight:600}
+.sum span{padding:4px 10px;border-radius:20px;background:var(--bg);border:1px solid var(--bd)}
+.bar{position:sticky;bottom:0;background:var(--bg);padding:10px 0;display:flex;gap:8px;flex-wrap:wrap}
+.repx{width:720px;box-sizing:border-box;background:#fff;color:#000;padding:20px;word-break:break-word;font-family:'Sarabun',sans-serif;font-size:13px}
+.repx table{width:100%;border-collapse:collapse;table-layout:fixed}
+.repx td,.repx th{border:1px solid #888;padding:5px;vertical-align:top}
+.repx th{background:#e3efe8}
+.repx img{width:200px;height:auto;display:block;margin:4px 0}
+.repx tr{page-break-inside:avoid}
+
+.tb{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.sub{margin:0 0 12px;color:var(--mu);font-size:14px}
+.tag{font-size:12px;color:var(--mu)}
+.st{border-collapse:collapse;min-width:760px;width:100%;font-size:14px}
+.st th{background:#1f3864;color:#fff;padding:8px;border:1px solid var(--bd);text-align:center}
+.st td{border:1px solid var(--bd);padding:6px;text-align:center;vertical-align:middle;background:var(--card)}
+.st .btn{padding:4px 8px;font-size:12px;margin:1px}.st td.l{text-align:left;min-width:260px}.st input{padding:4px;font-size:13px;min-width:130px}
+</style></head><body><main>
+<div id="app"></div>
+<div class="bar" id="bar"><button class="btn" id="bs">💾 บันทึกผลลงสรุป</button><button class="btn" id="bx">ดาวน์โหลด Excel (สรุป + รูป)</button><button class="btn" id="bp">ดาวน์โหลด PDF (พร้อมรูป)</button><button class="btn s" id="bc">ล้างข้อมูลที่กรอก</button></div>
+<p style="font-size:12px;color:var(--mu)">หมายเหตุ: ผลตรวจและรูปอยู่ในหน้านี้เท่านั้น หากรีเฟรชหน้าจะหาย ควรดาวน์โหลดไฟล์ก่อนปิดหน้า (ส่วนหัวข้อ/ชื่อฟอร์มที่แก้ไว้ จะถูกจำไว้ในเบราว์เซอร์เครื่องนี้)</p>
+<div id="rep"></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const TODAY=new Date().toISOString().slice(0,10);
+const DEP=["PD1","PD2","PD3","PD4","ENG","QA/RD","SSL - ST","จัดซื้อ","PL","PK","IT","STD","ฝ่ายขาย","การเงิน","บัญชี","ฝ่ายบุคคล"];
+const IT=["ไม่พบกลิ่น / ควัน / ฝุ่นละอองผิดปกติจากปล่องระบายหรือกระบวนการทำงาน","มีการคัดแยกประเภทขยะถูกต้องตามที่กำหนด","มีป้ายชี้บ่งจุดทิ้งขยะ และประเภทขยะอย่างชัดเจน","มีการใช้สีของถุงขยะอย่างถูกประเภท","พื้นที่หน้างานมีการติดตารางแจ้งสีของถุงขยะอันตราย","ถังขยะหรือภาชนะบรรจุอยู่ในสภาพดี ไม่แตก","ภาชนะบรรจุขยะมีอย่างเพียพอ (ไม่มีขยะล้น)","มีฝาปิดถังขยะกรณีเป็นขยะที่มีกลิ่นหรือสารระเหย","สารเคมี / วัสดุอันตรายจัดเก็บเป็นระเบียบ มีป้ายเตือนและมี SDS","มีอุปกรณ์ป้องกันการรั่วไหลของสารเคมีพร้อมใช้งาน","ไม่พบการรั่วไหลของน้ำมันหรือสิ่งผิดปกติ","มีถังดับเพลิงกรณีเป็นขยะที่มีการลุกไหม้ได้","พื้นที่สะอาด เป็นระเบียบ ไม่มีสิ่งกีดขวางทางเดิน (5ส)"];
+IT[6]="ภาชนะบรรจุขยะมีอย่างเพียงพอ (ไม่มีขยะล้น)";
+const DEF=()=>({title:'แบบฟอร์มการตรวจประเมินสิ่งแวดล้อมภายในโรงงาน',sub:'ตรวจเป็นรายแผนก ทุกเดือน — หากข้อใดไม่ผ่าน ให้ระบุรายละเอียดปัญหาพร้อมแนบรูปภาพประกอบในข้อนั้น',noteL:'รายละเอียดปัญหาที่พบ (ภาพรวม)',rl:{pass:'ผ่าน',fail:'ไม่ผ่าน',na:'ไม่เกี่ยวข้อง'},fields:[{l:'วันที่ตรวจ',k:'date'},{l:'แผนก/ฝ่าย',k:'list',o:DEP.slice()},{l:'ผู้ตรวจ',k:'text'},{l:'ผู้รับตรวจ',k:'text'}],items:IT.map(t=>({g:'รายการตรวจประเมินสิ่งแวดล้อม',t}))});
+const KEY='ehs-cfg-v2',KN={text:'ข้อความ',date:'วันที่',list:'เลือกจากรายการ'};
+let cfg,items,note='',edit=false;
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({title:cfg.title,sub:cfg.sub,noteL:cfg.noteL,rl:cfg.rl,fields:cfg.fields.map(f=>({l:f.l,k:f.k,o:f.o})),items:items.map(i=>({g:i.g,t:i.t}))}))}catch(e){}}
+function init(reset){let c=null;if(!reset){try{c=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}}
+ cfg=c&&c.fields&&c.items&&c.items.length&&c.rl?c:DEF();
+ cfg.fields.forEach(f=>{f.v=f.k==='date'?TODAY:''});
+ items=cfg.items.map(x=>({g:x.g,t:x.t,v:'',n:'',p:[]}));note='';render()}
+const LB=v=>cfg.rl[v];
+function render(){
+ $('bar').style.display=view!=='audit'?'none':'flex';if(view!=='audit'){renderSum();return}
+ let h=tabs()+`<div class="tb"><button class="btn ${edit?'':'s'}" data-a="edit">${edit?'✔ เสร็จสิ้นการแก้ไข':'✏️ แก้ไขแบบฟอร์ม (ทุกส่วน)'}</button>${edit?'<button class="btn s" data-a="reset">คืนค่าเดิมทั้งหมด</button>':''}</div>`;
+ if(edit){
+  h+=`<div class="card"><label>ชื่อแบบฟอร์ม</label><input data-c="title" value="${esc(cfg.title)}"><label>คำอธิบายใต้ชื่อ</label><textarea rows="2" data-c="sub">${esc(cfg.sub)}</textarea></div><h2>ช่องข้อมูลส่วนหัว</h2>`;
+  cfg.fields.forEach((f,i)=>{h+=`<div class="card"><label>ชื่อช่อง</label><input data-fl="${i}" value="${esc(f.l)}"><label>ชนิดช่อง</label><select data-fk="${i}">${Object.keys(KN).map(k=>`<option value="${k}" ${f.k===k?'selected':''}>${KN[k]}</option>`).join('')}</select>${f.k==='list'?`<label>ตัวเลือก (บรรทัดละ 1 รายการ)</label><textarea rows="5" data-fo="${i}">${esc((f.o||[]).join('\n'))}</textarea>`:''}<div class="rs"><button data-a="fmv" data-i="${i}" data-d="-1">↑ ขึ้น</button><button data-a="fmv" data-i="${i}" data-d="1">↓ ลง</button><button data-a="fdl" data-i="${i}" style="color:var(--no)">🗑 ลบช่อง</button></div></div>`});
+  h+=`<button class="btn s" data-a="addf" style="margin-bottom:12px">+ เพิ่มช่องข้อมูลส่วนหัว</button><div class="card"><label>ชื่อปุ่มผลการตรวจ (ผ่าน / ไม่ผ่าน / ไม่เกี่ยวข้อง)</label><div class="g"><input data-rl="pass" value="${esc(cfg.rl.pass)}"><input data-rl="fail" value="${esc(cfg.rl.fail)}"><input data-rl="na" value="${esc(cfg.rl.na)}"></div><label>ชื่อช่องสรุปท้ายฟอร์ม</label><input data-c="noteL" value="${esc(cfg.noteL)}"></div><h2>หมวดและหัวข้อตรวจ</h2>`;
+ }else{
+  h+=`<h1>${esc(cfg.title)}</h1><p class="sub">${esc(cfg.sub)}</p><div class="card"><div class="g">${cfg.fields.map((f,i)=>`<div><label>${esc(f.l)}</label><input data-fv="${i}" value="${esc(f.v)}" ${f.k==='date'?'type="date"':''} ${f.k==='list'?`list="dl${i}" placeholder="เลือกหรือพิมพ์เอง"`:''}>${f.k==='list'?`<datalist id="dl${i}">${(f.o||[]).map(o=>`<option value="${esc(o)}">`).join('')}</datalist>`:''}</div>`).join('')}</div></div>`;
+ }
+ let last=null;
+ items.forEach((it,i)=>{
+  if(it.g!==last){h+=edit?`<div class="card"><label>ชื่อหมวด</label><input data-gr="${esc(it.g)}" value="${esc(it.g)}"></div>`:`<h2>${esc(it.g)}</h2>`;last=it.g}
+  if(edit){h+=`<div class="card"><label>ข้อที่ ${i+1}</label><textarea rows="2" data-t="${i}">${esc(it.t)}</textarea><div class="rs"><button data-a="mv" data-i="${i}" data-d="-1">↑ ขึ้น</button><button data-a="mv" data-i="${i}" data-d="1">↓ ลง</button><button data-a="dl" data-i="${i}" style="color:var(--no)">🗑 ลบข้อนี้</button></div></div>`;const nx=items[i+1];if(!nx||nx.g!==it.g)h+=`<button class="btn s" data-a="addi" data-i="${i}" style="margin-bottom:12px">+ เพิ่มข้อในหมวดนี้</button>`;return}
+  h+=`<div class="card"><div class="it">${i+1}. ${esc(it.t)}</div><div class="rs">${['pass','fail','na'].map(v=>`<button data-a="res" data-i="${i}" data-v="${v}" class="${it.v===v?'on':''}">${esc(LB(v))}</button>`).join('')}</div>
+  <textarea rows="2" data-n="${i}" placeholder="รายละเอียดปัญหาที่พบ (กรณีไม่ผ่านให้ระบุ)">${esc(it.n)}</textarea>
+  <div class="ph">${it.p.map((p,j)=>`<div><img src="${p}"><button class="x" data-a="rp" data-i="${i}" data-j="${j}">×</button></div>`).join('')}</div>
+  <label class="fl" style="margin-top:8px">📷 แนบรูป / ถ่ายรูป<input type="file" accept="image/*" multiple data-f="${i}"></label></div>`;
+ });
+ if(edit)h+=`<button class="btn s" data-a="ag">+ เพิ่มหมวดใหม่</button>`;
+ else h+=`<div class="card"><label>${esc(cfg.noteL)}</label><textarea rows="3" data-note="1">${esc(note)}</textarea><div class="sum" id="sum" style="margin-top:10px"></div></div>`;
+ $('app').innerHTML=h;summary();
+}
+function summary(){const el=$('sum');if(!el)return;
+ const c=k=>items.filter(i=>i.v===k).length,p=c('pass'),f=c('fail'),d=p+f;
+ el.innerHTML=`<span style="color:var(--ok)">${esc(LB('pass'))} ${p}</span><span style="color:var(--no)">${esc(LB('fail'))} ${f}</span><span>${esc(LB('na'))} ${c('na')}</span><span>ยังไม่ตรวจ ${items.filter(i=>!i.v).length}</span><span>% ${esc(LB('pass'))} ${d?Math.round(p*100/d):0}%</span>`}
+function shrink(file){return new Promise(r=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const m=900,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);r(c.toDataURL('image/jpeg',.72))};im.onerror=()=>r(null);im.src=u})}
+const NEW=g=>({g,t:'หัวข้อตรวจใหม่',v:'',n:'',p:[]});
+$('app').addEventListener('click',e=>{
+ const b=e.target.closest('button');if(!b||!b.dataset.a)return;const d=b.dataset,i=+d.i,a=d.a;
+ if(a==='tab'){view=d.v;edit=false;render();if(view==='sum')loadAll();return}
+ if(a==='xsum'){xsum();return}
+ if(a==='reload'){loadAll();return}
+ if(a==='back'){view='sum';render();return}
+ if(a==='setgs'){GS={u:$('gu').value.trim(),k:$('gk').value};try{localStorage.setItem('ehs-gs',JSON.stringify(GS))}catch(x){}loadAll();return}
+ if(a==='cleargs'){GS={};try{localStorage.removeItem('ehs-gs')}catch(x){}loadAll();return}
+ if(a==='view'||a==='xl'||a==='pd'){act(a,d.id);return}
+ if(a==='xlr'){xlsxOf(detR,false);return}
+ if(a==='pdr'){pdfOf(detR);return}
+ if(a==='delrec'){if(confirm('ลบผลการตรวจครั้งนี้ออกจากระบบถาวร (รวมรูป)?'))delRec(d.id);return}
+ if(a==='edit'){edit=!edit;render();return}
+ if(a==='reset'){if(confirm('คืนชื่อฟอร์ม ช่องส่วนหัว และหัวข้อทั้งหมดเป็นแบบเดิม? ข้อมูลที่กรอกไว้จะหาย')){try{localStorage.removeItem(KEY)}catch(x){}init(true)}return}
+ if(a==='res'){items[i].v=items[i].v===d.v?'':d.v;render();return}
+ if(a==='rp'){items[i].p.splice(+d.j,1);render();return}
+ if(a==='ag'){items.push(NEW('หมวดใหม่'))}
+ else if(a==='addi'){items.splice(i+1,0,NEW(items[i].g))}
+ else if(a==='dl'){const it=items[i];if(it.v||it.n||it.p.length){if(!confirm('ข้อนี้มีข้อมูลที่กรอกไว้ ต้องการลบหรือไม่'))return}items.splice(i,1)}
+ else if(a==='mv'){const k=i+ +d.d;if(items[k]&&items[k].g===items[i].g)[items[i],items[k]]=[items[k],items[i]];else return}
+ else if(a==='addf'){cfg.fields.push({l:'ช่องใหม่',k:'text',v:''})}
+ else if(a==='fdl'){cfg.fields.splice(i,1)}
+ else if(a==='fmv'){const k=i+ +d.d;if(cfg.fields[k])[cfg.fields[i],cfg.fields[k]]=[cfg.fields[k],cfg.fields[i]];else return}
+ else return;
+ persist();render();
+});
+$('app').addEventListener('input',e=>{const t=e.target,d=t.dataset;
+ if(d.c)cfg[d.c]=t.value;else if(d.rl)cfg.rl[d.rl]=t.value;else if(d.t!==undefined)items[d.t].t=t.value;else if(d.n!==undefined)items[d.n].n=t.value;
+ else if(d.fv!==undefined)cfg.fields[d.fv].v=t.value;else if(d.fl!==undefined)cfg.fields[d.fl].l=t.value;
+ else if(d.fo!==undefined)cfg.fields[d.fo].o=t.value.split('\n').map(x=>x.trim()).filter(Boolean);
+ else if(d.note!==undefined)note=t.value;else return;persist()});
+$('app').addEventListener('change',async e=>{const t=e.target,d=t.dataset;
+ if(d.flt!==undefined){hf=t.value;render()}
+ else if(d.pl!==undefined){putPlan(d.pl,t.value.trim())}
+ else if(d.gr!==undefined){const nv=t.value.trim()||d.gr;items.forEach(i=>{if(i.g===d.gr)i.g=nv});persist();render()}
+ else if(d.fk!==undefined){const f=cfg.fields[d.fk];f.k=t.value;if(f.k==='list'&&!f.o)f.o=[];f.v=f.k==='date'?TODAY:'';persist();render()}
+ else if(d.f!==undefined){for(const f of t.files){const x=await shrink(f);if(x)items[d.f].p.push(x)}render()}});
+$('bc').onclick=()=>{if(confirm('ล้างผลตรวจ รูป และข้อมูลที่กรอกทั้งหมด? (หัวข้อที่แก้ไว้จะยังอยู่)')){items.forEach(i=>{i.v='';i.n='';i.p=[]});cfg.fields.forEach(f=>f.v=f.k==='date'?TODAY:'');note='';render()}};
+function dl(blob,name){const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},4000)}
+async function save(blob,name){
+ let d=null;try{if(typeof claude!=='undefined')d=await claude.use('downloads')}catch(e){d=null}
+ if(!d){dl(blob,name);return}
+ try{await d.save({filename:name,data:blob})}catch(e){if(e&&e.code!=='declined')dl(blob,name)}
+}
+const fv=k=>{const f=cfg.fields.find(x=>x.k===k);return f?f.v:''};
+const fname=ext=>`EHS-Audit_${(fv('list')||'report').replace(/[\\/:*?"<>|\s]+/g,'_')}_${fv('date')||TODAY}.${ext}`;
+function chk(){if(edit){alert('กรุณากด "เสร็จสิ้นการแก้ไข" ก่อน');return false}
+ if(cfg.fields.some(f=>(f.k==='date'||f.k==='list')&&!String(f.v).trim())){alert('กรุณากรอกช่องวันที่และช่องที่เลือกจากรายการ (เช่น แผนก) ให้ครบก่อน');return false}
+ const m=items.filter(i=>i.v==='fail'&&!i.n.trim()&&!i.p.length).length;
+ return !m||confirm('มี '+m+' ข้อที่'+LB('fail')+'แต่ยังไม่ระบุรายละเอียด/แนบรูป ต้องการดาวน์โหลดต่อหรือไม่')}
+let view='audit',recs=[],plan={},busy='',detR=null,hf='',GS={};
+try{GS=JSON.parse(localStorage.getItem('ehs-gs')||'{}')||{}}catch(e){}
+const remote=()=>!!GS.u,XT='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const hid=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return (h>>>0).toString(36)};
+const normD=d=>{d=String(d||'');if(/^\d{4}-\d\d-\d\d$/.test(d))return d;
+ const m=d.match(/^[A-Za-z]{3} ([A-Za-z]{3}) (\d{1,2}) (\d{4})/);
+ if(m){const mo='JanFebMarAprMayJunJulAugSepOctNovDec'.indexOf(m[1]);if(mo>=0)return`${m[3]}-${String(mo/3+1).padStart(2,'0')}-${m[2].padStart(2,'0')}`}
+ const t=new Date(d);return(/T\d\d:/.test(d)&&!isNaN(t))?`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`:d};
+const fd=d=>/^\d{4}-\d\d-\d\d$/.test(d||'')?d.split('-').reverse().join('-'):(d||'');
+const sm=r=>({id:r.id,dept:r.dept,date:r.date,total:r.total,pass:r.pass,fail:r.fail,na:r.na,problems:r.problems,at:r.at});
+const fnR=(R,ext)=>`EHS-Audit_${String(R.dept).replace(/[\\/:*?"<>|\s]+/g,'_')}_${R.date}.${ext}`;
+const tabs=()=>`<div class="tb"><button class="btn ${view==='audit'?'':'s'}" data-a="tab" data-v="audit">📝 ตรวจ</button><button class="btn ${view==='audit'?'s':''}" data-a="tab" data-v="sum">📊 สรุป / ประวัติ</button></div>`;
+/* ---- local store (IndexedDB, memory fallback) ---- */
+let _db;const mem=new Map();
+const idb=()=>_db||(_db=new Promise((res,rej)=>{const r=indexedDB.open('ehs-audit',1);r.onupgradeneeded=()=>r.result.createObjectStore('audits',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+async function LS(op,arg){try{const d=await idb();return await new Promise((res,rej)=>{const t=d.transaction('audits',op==='all'||op==='get'?'readonly':'readwrite'),st=t.objectStore('audits'),q=op==='put'?st.put(arg):op==='del'?st.delete(arg):op==='get'?st.get(arg):st.getAll();t.oncomplete=()=>res(q.result);t.onerror=t.onabort=()=>rej(t.error)})}catch(e){if(op==='put')mem.set(arg.id,arg);else if(op==='del')mem.delete(arg);else if(op==='get')return mem.get(arg);else return [...mem.values()]}}
+/* ---- Google Apps Script ---- */
+async function gget(q){const r=await fetch(`${GS.u}?k=${encodeURIComponent(GS.k||'')}&${q}`),j=await r.json();if(j.error)throw new Error(j.error);return j}
+async function gpost(o){const r=await fetch(GS.u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...o,k:GS.k||''})}),j=await r.json();if(j.error)throw new Error(j.error);return j}
+function sumRefresh(){const a=document.activeElement;if(view==='sum'&&!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)))render()}
+async function loadAll(){busy='กำลังโหลด...';sumRefresh();
+ try{if(remote()){const j=await gget('a=list');recs=(j.recs||[]).map(r=>({...r,date:normD(r.date)}));plan=j.plan||{}}
+  else{recs=((await LS('all'))||[]).map(sm);try{plan=JSON.parse(localStorage.getItem('ehs-plan')||'{}')}catch(e){plan={}}}}
+ catch(e){alert('โหลดข้อมูลไม่สำเร็จ: '+(e.message||e)+(remote()?'\nตรวจสอบ URL / รหัสผ่าน / การตั้งค่า Deploy':''))}
+ busy='';sumRefresh()}
+async function putRec(r){try{busy='กำลังบันทึก...';if(remote())await gpost({a:'save',rec:r});else await LS('put',r);recs=recs.filter(q=>q.id!==r.id).concat(sm(r));busy='';return true}catch(e){busy='';alert('บันทึกไม่สำเร็จ: '+(e.message||e));return false}}
+async function delRec(id){try{if(remote())await gpost({a:'del',id});else await LS('del',id);recs=recs.filter(q=>q.id!==id);render()}catch(e){alert('ลบไม่สำเร็จ: '+(e.message||e))}}
+async function getFull(id){return remote()?(await gget('a=get&id='+encodeURIComponent(id))).rec:LS('get',id)}
+async function putPlan(dept,v){plan[dept]=v;try{if(remote())await gpost({a:'plan',dept,d:v});else localStorage.setItem('ehs-plan',JSON.stringify(plan))}catch(e){alert('บันทึกไม่สำเร็จ: '+(e.message||e))}}
+async function act(a,id){try{const R=await getFull(id);if(!R){alert('ไม่พบข้อมูลฉบับเต็ม (รายการนี้อาจบันทึกด้วยเวอร์ชันเก่า)');return}if(a==='view'){detR=R;view='det';render()}else if(a==='xl')xlsxOf(R,false);else pdfOf(R)}catch(e){alert('โหลดไม่สำเร็จ: '+(e.message||e))}}
+function curRec(){const dept=fv('list').trim(),date=fv('date');if(!dept||!date)return null;
+ const c=k=>items.filter(i=>i.v===k).length;
+ const pr=items.map((it,i)=>it.v==='fail'?'- '+(it.n.trim()||`ข้อ ${i+1} ${it.t}`):'').filter(Boolean);
+ if(note.trim())pr.push('- สรุป: '+note.trim());
+ return {id:`a_${hid(dept)}_${date}`,dept,date,total:items.length,pass:c('pass'),fail:c('fail'),na:c('na'),problems:pr.join('\n'),at:Date.now(),title:cfg.title,noteL:cfg.noteL,note,rl:{...cfg.rl},fields:cfg.fields.map(f=>({l:f.l,k:f.k,v:f.v})),items:items.map(i=>({g:i.g,t:i.t,v:i.v,n:i.n,p:i.p.slice()}))}}
+function clearForm(){items.forEach(i=>{i.v='';i.n='';i.p=[]});cfg.fields.forEach(f=>f.v=f.k==='date'?TODAY:'');note='';render()}
+function sumRows(extra){
+ let rs=recs.filter(r=>!extra||r.id!==extra.id);if(extra)rs=rs.concat(extra);
+ const opts=((cfg.fields.find(f=>f.k==='list')||{}).o||[]).slice();
+ rs.forEach(r=>{if(!opts.includes(r.dept))opts.push(r.dept)});
+ const all=opts.map(d=>{const m=rs.filter(r=>r.dept===d).sort((a,b)=>a.date<b.date?1:-1);return {dept:d,rec:m[0]||null,n:m.length,plan:plan[d]||''}});
+ return all.filter(r=>r.rec).sort((a,b)=>a.rec.date<b.rec.date?-1:1).concat(all.filter(r=>!r.rec))}
+const ABT=id=>`<button class="btn s" data-a="view" data-id="${esc(id)}">ดู</button><button class="btn s" data-a="xl" data-id="${esc(id)}">Excel</button><button class="btn s" data-a="pd" data-id="${esc(id)}">PDF</button>`;
+function renderSum(){
+ if(view==='det'){renderDet();return}
+ const rows=sumRows(),depts=[...new Set(recs.map(r=>r.dept))];
+ const hist=recs.filter(r=>!hf||r.dept===hf).sort((a,b)=>a.date<b.date?1:-1);
+ let h=tabs()+`<h1>สรุปผลตรวจรายแผนก</h1><p class="sub">${remote()?'เชื่อมต่อ Google Sheet แล้ว — ทุกเครื่องที่ตั้งค่าเดียวกันเห็นข้อมูลชุดเดียวกัน':'ตอนนี้เก็บข้อมูลในเครื่องนี้เท่านั้น — ตั้งค่า Google Sheet ด้านล่างเพื่อใช้ร่วมกันทุกเครื่อง'}${busy?' · '+busy:''}</p>
+ <div class="tb"><button class="btn" data-a="xsum">ดาวน์โหลดสรุป Excel</button><button class="btn s" data-a="reload">⟳ โหลดข้อมูลใหม่</button></div>
+ <div style="overflow-x:auto"><table class="st"><tr><th>ลำดับ</th><th>แผนก</th><th>วันที่เข้าตรวจ</th><th>จำนวนข้อทั้งหมด</th><th>${esc(LB('pass'))}</th><th>${esc(LB('fail'))}</th><th>${esc(LB('na'))}</th><th>รายละเอียดปัญหาที่พบ</th><th>ดู / ดาวน์โหลด</th></tr>`;
+ rows.forEach((r,i)=>{const x=r.rec;h+=`<tr><td>${i+1}</td><td><b>${esc(r.dept)}</b></td><td>${x?fd(x.date)+(r.n>1?`<div class="tag">ตรวจแล้ว ${r.n} ครั้ง</div>`:''):`<input data-pl="${esc(r.dept)}" value="${esc(r.plan)}" placeholder="วันที่วางแผน">`}</td><td>${x?x.total:items.length}</td><td>${x?x.pass:''}</td><td>${x?x.fail:''}</td><td>${x?x.na:''}</td><td class="l">${x?esc(x.problems).replace(/\n/g,'<br>'):''}</td><td>${x?ABT(x.id):''}</td></tr>`});
+ h+=`</table></div><h2>ประวัติการตรวจทั้งหมด</h2><div class="card"><label>กรองตามแผนก</label><select data-flt="1"><option value="">ทั้งหมด</option>${depts.map(d=>`<option ${d===hf?'selected':''}>${esc(d)}</option>`).join('')}</select></div><div style="overflow-x:auto"><table class="st"><tr><th>วันที่</th><th>แผนก</th><th>${esc(LB('pass'))}</th><th>${esc(LB('fail'))}</th><th>${esc(LB('na'))}</th><th>ดู / ดาวน์โหลด</th></tr>${hist.map(r=>`<tr><td>${fd(r.date)}</td><td><b>${esc(r.dept)}</b></td><td>${r.pass}</td><td>${r.fail}</td><td>${r.na}</td><td>${ABT(r.id)}<button class="btn s" data-a="delrec" data-id="${esc(r.id)}">🗑</button></td></tr>`).join('')||'<tr><td colspan="6">ยังไม่มีประวัติ</td></tr>'}</table></div>
+ <div class="card" style="margin-top:14px"><h2 style="margin-top:0">⚙ เชื่อมต่อ Google Sheet</h2><label>Web app URL (จาก Apps Script)</label><input id="gu" value="${esc(GS.u||'')}" placeholder="https://script.google.com/macros/s/.../exec"><label>รหัสผ่านที่ตั้งไว้ในโค้ด</label><input id="gk" type="password" value="${esc(GS.k||'')}"><div class="tb" style="margin-top:8px"><button class="btn" data-a="setgs">บันทึกและเชื่อมต่อ</button>${remote()?'<button class="btn s" data-a="cleargs">ยกเลิกการเชื่อมต่อ</button>':''}</div></div>`;
+ $('app').innerHTML=h}
+function renderDet(){const R=detR;if(!R){view='sum';render();return}
+ const L=v=>R.rl[v],col={pass:'var(--ok)',fail:'var(--no)',na:'var(--na)'};
+ let h=tabs()+`<div class="tb"><button class="btn s" data-a="back">← กลับ</button><button class="btn" data-a="xlr">ดาวน์โหลด Excel</button><button class="btn" data-a="pdr">ดาวน์โหลด PDF</button></div><h1>${esc(R.title)}</h1><div class="card">${R.fields.map(f=>`<div>${esc(f.l)}: <b>${esc(f.v)}</b></div>`).join('')}<div class="sum" style="margin-top:8px"><span>${esc(L('pass'))} ${R.pass}</span><span>${esc(L('fail'))} ${R.fail}</span><span>${esc(L('na'))} ${R.na}</span></div></div>`;
+ R.items.forEach((it,i)=>{h+=`<div class="card"><div class="it">${i+1}. ${esc(it.t)}</div><div style="margin:6px 0;font-weight:700;color:${col[it.v]||'var(--mu)'}">${it.v?esc(L(it.v)):'ยังไม่ตรวจ'}</div>${it.n?`<div style="white-space:pre-wrap">${esc(it.n)}</div>`:''}<div class="ph">${it.p.map(p=>`<img src="${p}" style="width:120px;height:120px">`).join('')}</div></div>`});
+ $('app').innerHTML=h+`<div class="card"><label>${esc(R.noteL)}</label><div style="white-space:pre-wrap">${esc(R.note)}</div></div>`}
+function addSummary(wb,rows){
+ const ws=wb.addWorksheet('สรุปผลตรวจรายแผนก',{views:[{showGridLines:false}]});
+ const font={name:'Sarabun',size:11},bd={style:'thin',color:{argb:'FFBBBBBB'}},B={top:bd,left:bd,bottom:bd,right:bd},navy={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F3864'}};
+ ws.columns=[{width:8},{width:14},{width:22},{width:16},{width:10},{width:10},{width:14},{width:80}];
+ ws.mergeCells('A1:H1');const t=ws.getCell('A1');t.value='สรุปผลตรวจรายแผนก';t.font={bold:true,size:14,name:'Sarabun',color:{argb:'FFFFFFFF'}};t.fill=navy;t.alignment={horizontal:'center',vertical:'middle'};ws.getRow(1).height=26;
+ const hr=ws.getRow(3);hr.values=['ลำดับ','แผนก','วันที่เข้าตรวจ','จำนวนข้อทั้งหมด',LB('pass'),LB('fail'),LB('na'),'รายละเอียดปัญหาที่พบ'];hr.height=34;
+ for(let k=1;k<=8;k++){const c=hr.getCell(k);c.font={bold:true,name:'Sarabun',color:{argb:'FFFFFFFF'}};c.fill=navy;c.border=B;c.alignment={horizontal:'center',vertical:'middle',wrapText:true}}
+ rows.forEach((r,i)=>{const x=r.rec,row=ws.getRow(4+i);
+  row.values=[i+1,r.dept,x?fd(x.date):r.plan,x?x.total:items.length,x?x.pass:'',x?x.fail:'',x?x.na:'',x?x.problems:''];
+  for(let k=1;k<=8;k++){const c=row.getCell(k);c.font={...font,bold:k===2};c.border=B;c.alignment={horizontal:k===8?'left':'center',vertical:'middle',wrapText:true}}
+  row.height=x&&x.problems?Math.max(22,16*(x.problems.split('\n').length+0.5)):22});
+}
+async function xsum(){const wb=new ExcelJS.Workbook();addSummary(wb,sumRows());const buf=await wb.xlsx.writeBuffer();save(new Blob([buf],{type:XT}),`EHS-Audit-Summary_${TODAY}.xlsx`)}
+async function xlsxOf(R,withSum){
+ const wb=new ExcelJS.Workbook();if(withSum)addSummary(wb,sumRows(sm(R)));
+ const its=R.items,L=v=>R.rl[v];
+ const ws=wb.addWorksheet(('ตรวจ '+R.dept).replace(/[\\\/?*\[\]:]/g,'').slice(0,31)||'Audit',{views:[{showGridLines:false}]});
+ const mp=Math.min(6,Math.max(1,...its.map(i=>i.p.length)));
+ const font={name:'Sarabun',size:11},hd={bold:true,name:'Sarabun'};
+ ws.columns=[{width:6},{width:22},{width:44},{width:14},{width:32},...Array(mp).fill({width:24})];
+ ws.mergeCells(1,1,1,5);ws.getCell('A1').value='รายงานผลการตรวจ – '+R.title;ws.getCell('A1').font={bold:true,size:16,name:'Sarabun'};
+ R.fields.forEach((f,i)=>{const r=3+i;ws.getCell(r,2).value=f.l;ws.getCell(r,2).font=hd;ws.getCell(r,3).value=f.v;ws.getCell(r,3).font=font});
+ ws.getCell('E3').value=`${L('pass')} ${R.pass} | ${L('fail')} ${R.fail} | ${L('na')} ${R.na}`;ws.getCell('E4').value=`% ${L('pass')} ${R.pass+R.fail?Math.round(R.pass*100/(R.pass+R.fail)):0}%`;
+ ['E3','E4'].forEach(a=>ws.getCell(a).font=hd);
+ const hr=Math.max(8,R.fields.length+5);
+ ['ข้อ','หมวด','รายการตรวจ','ผลการตรวจ','รายละเอียดปัญหา','รูปประกอบ'].forEach((t,i)=>{const x=ws.getCell(hr,i+1);x.value=t;x.font={...hd,color:{argb:'FFFFFFFF'}};x.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF1F7A4D'}};x.alignment={horizontal:'center',vertical:'middle'}});
+ if(mp>1)ws.mergeCells(hr,6,hr,5+mp);
+ const bd={style:'thin',color:{argb:'FF999999'}},B={top:bd,left:bd,bottom:bd,right:bd},col={pass:'FFC8E6D3',fail:'FFF5C6C0',na:'FFE5E8EB'};
+ for(let i=0;i<its.length;i++){
+  const it=its[i],r=hr+1+i,row=ws.getRow(r);
+  row.values=[i+1,it.g,it.t,it.v?L(it.v):'ยังไม่ตรวจ',it.n];
+  for(let k=1;k<=5+mp;k++){const x=row.getCell(k);x.border=B;x.font=font;x.alignment={vertical:'middle',wrapText:true,horizontal:k===1||k===4?'center':'left'}}
+  if(it.v)row.getCell(4).fill={type:'pattern',pattern:'solid',fgColor:{argb:col[it.v]}};
+  row.height=it.p.length?100:34;
+  it.p.slice(0,mp).forEach((src,j)=>{const id=wb.addImage({base64:src,extension:'jpeg'});ws.addImage(id,{tl:{col:5+j+.05,row:r-1+.05},ext:{width:155,height:125},editAs:'oneCell'})});
+ }
+ const e=hr+its.length+2;ws.mergeCells(e,1,e,5);ws.getCell(e,1).value=R.noteL+': '+R.note;ws.getCell(e,1).font=font;ws.getCell(e,1).alignment={wrapText:true,vertical:'top'};ws.getRow(e).height=50;
+ ws.pageSetup={orientation:'landscape',fitToPage:true,fitToWidth:1,fitToHeight:0};
+ const buf=await wb.xlsx.writeBuffer();save(new Blob([buf],{type:XT}),fnR(R,'xlsx'));
+}
+async function pdfOf(R){
+ const L=v=>R.rl[v],w=document.createElement('div'),r=document.createElement('div');
+ w.style.cssText='height:0;overflow:hidden';r.className='repx';w.appendChild(r);document.body.appendChild(w);
+ r.innerHTML=`<h2 style="margin:0 0 6px;color:#1f7a4d;font-size:20px">${esc(R.title)}</h2>
+ <div>${R.fields.map(x=>`${esc(x.l)}: <b>${esc(x.v)}</b>`).join(' &nbsp; ')}</div>
+ <div style="margin:6px 0"><b>สรุป:</b> ${esc(L('pass'))} ${R.pass} | ${esc(L('fail'))} ${R.fail} | ${esc(L('na'))} ${R.na} | % ${esc(L('pass'))} ${R.pass+R.fail?Math.round(R.pass*100/(R.pass+R.fail)):0}%</div>
+ <table><tr><th style="width:28px">ข้อ</th><th>รายการตรวจ</th><th style="width:60px">ผล</th><th style="width:220px">ปัญหาที่พบ / รูป</th></tr>
+ ${R.items.map((it,i)=>`<tr><td align="center">${i+1}</td><td><small>${esc(it.g)}</small><br>${esc(it.t)}</td><td align="center" style="color:${it.v==='pass'?'#1f7a4d':it.v==='fail'?'#c0392b':'#555'};font-weight:700">${it.v?esc(L(it.v)):'-'}</td><td>${esc(it.n)}<div>${it.p.map(s=>`<img src="${s}">`).join('')}</div></td></tr>`).join('')}</table>
+ <p><b>${esc(R.noteL)}:</b> ${esc(R.note)}</p>`;
+ const sy=window.scrollY;window.scrollTo(0,0);
+ try{await document.fonts.ready;await Promise.all([...r.querySelectorAll('img')].map(im=>im.decode?im.decode().catch(()=>{}):0));
+  const blob=await html2pdf().set({margin:8,image:{type:'jpeg',quality:.85},html2canvas:{scale:2,useCORS:true,scrollX:0,scrollY:0},jsPDF:{unit:'mm',format:'a4'},pagebreak:{mode:['css'],avoid:'tr'}}).from(r).outputPdf('blob');
+  await save(blob,fnR(R,'pdf'))}
+ catch(e){alert('สร้าง PDF ไม่สำเร็จ: '+(e.message||e))}
+ w.remove();window.scrollTo(0,sy);
+}
+$('bx').onclick=async()=>{if(!chk())return;const R=curRec();await putRec(R);xlsxOf(R,true)};
+$('bp').onclick=async()=>{if(!chk())return;const R=curRec();await putRec(R);pdfOf(R)};
+$('bs').onclick=async()=>{if(!chk())return;const R=curRec();if(R&&await putRec(R)&&confirm('บันทึกผลลงสรุป/ประวัติแล้ว\nต้องการล้างฟอร์มเพื่อตรวจแผนกถัดไปเลยหรือไม่?'))clearForm()};
+init();if(remote())loadAll();
+</script></body></html>
