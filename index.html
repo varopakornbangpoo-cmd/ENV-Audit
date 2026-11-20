@@ -5,6 +5,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="config.js"></script>
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f7f5;--card:#fff;--tx:#1b2a22;--mu:#5f7068;--bd:#d5ded9;--ac:#1f7a4d;--ok:#1f7a4d;--no:#c0392b;--na:#7b8794}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121a16;--card:#1b2620;--tx:#e6efe9;--mu:#9fb2a8;--bd:#2f3f36;--ac:#3fb67c;--ok:#3fb67c;--no:#ef6b5b;--na:#8b97a3}}
@@ -152,6 +153,7 @@ function chk(){if(edit){alert('กรุณากด "เสร็จสิ้�
  return !m||confirm('มี '+m+' ข้อที่'+LB('fail')+'แต่ยังไม่ระบุรายละเอียด/แนบรูป ต้องการดาวน์โหลดต่อหรือไม่')}
 let view='audit',recs=[],plan={},busy='',detR=null,hf='',GS={};
 try{GS=JSON.parse(localStorage.getItem('ehs-gs')||'{}')||{}}catch(e){}
+const CFG=(typeof window.EHS_CONFIG==='object'&&window.EHS_CONFIG&&window.EHS_CONFIG.u)?window.EHS_CONFIG:null;if(CFG)GS={u:CFG.u,k:CFG.k||''};
 const remote=()=>!!GS.u,XT='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const hid=s=>{let h=0;for(const c of String(s))h=(h*31+c.charCodeAt(0))|0;return (h>>>0).toString(36)};
 const normD=d=>{d=String(d||'');if(/^\d{4}-\d\d-\d\d$/.test(d))return d;
@@ -202,7 +204,7 @@ function renderSum(){
  <div style="overflow-x:auto"><table class="st"><tr><th>ลำดับ</th><th>แผนก</th><th>วันที่เข้าตรวจ</th><th>จำนวนข้อทั้งหมด</th><th>${esc(LB('pass'))}</th><th>${esc(LB('fail'))}</th><th>${esc(LB('na'))}</th><th>รายละเอียดปัญหาที่พบ</th><th>ดู / ดาวน์โหลด</th></tr>`;
  rows.forEach((r,i)=>{const x=r.rec;h+=`<tr><td>${i+1}</td><td><b>${esc(r.dept)}</b></td><td>${x?fd(x.date)+(r.n>1?`<div class="tag">ตรวจแล้ว ${r.n} ครั้ง</div>`:''):`<input data-pl="${esc(r.dept)}" value="${esc(r.plan)}" placeholder="วันที่วางแผน">`}</td><td>${x?x.total:items.length}</td><td>${x?x.pass:''}</td><td>${x?x.fail:''}</td><td>${x?x.na:''}</td><td class="l">${x?esc(x.problems).replace(/\n/g,'<br>'):''}</td><td>${x?ABT(x.id):''}</td></tr>`});
  h+=`</table></div><h2>ประวัติการตรวจทั้งหมด</h2><div class="card"><label>กรองตามแผนก</label><select data-flt="1"><option value="">ทั้งหมด</option>${depts.map(d=>`<option ${d===hf?'selected':''}>${esc(d)}</option>`).join('')}</select></div><div style="overflow-x:auto"><table class="st"><tr><th>วันที่</th><th>แผนก</th><th>${esc(LB('pass'))}</th><th>${esc(LB('fail'))}</th><th>${esc(LB('na'))}</th><th>ดู / ดาวน์โหลด</th></tr>${hist.map(r=>`<tr><td>${fd(r.date)}</td><td><b>${esc(r.dept)}</b></td><td>${r.pass}</td><td>${r.fail}</td><td>${r.na}</td><td>${ABT(r.id)}<button class="btn s" data-a="delrec" data-id="${esc(r.id)}">🗑</button></td></tr>`).join('')||'<tr><td colspan="6">ยังไม่มีประวัติ</td></tr>'}</table></div>
- <div class="card" style="margin-top:14px"><h2 style="margin-top:0">⚙ เชื่อมต่อ Google Sheet</h2><label>Web app URL (จาก Apps Script)</label><input id="gu" value="${esc(GS.u||'')}" placeholder="https://script.google.com/macros/s/.../exec"><label>รหัสผ่านที่ตั้งไว้ในโค้ด</label><input id="gk" type="password" value="${esc(GS.k||'')}"><div class="tb" style="margin-top:8px"><button class="btn" data-a="setgs">บันทึกและเชื่อมต่อ</button>${remote()?'<button class="btn s" data-a="cleargs">ยกเลิกการเชื่อมต่อ</button>':''}</div></div>`;
+ ${CFG?`<div class="card" style="margin-top:14px">✅ เชื่อมต่อ Google Sheet อัตโนมัติ (ตั้งค่าไว้ในไฟล์ config.js) — ทุกเครื่องที่เปิดลิงก์นี้เห็นข้อมูลชุดเดียวกัน</div>`:`<div class="card" style="margin-top:14px"><h2 style="margin-top:0">⚙ เชื่อมต่อ Google Sheet</h2><label>Web app URL (จาก Apps Script)</label><input id="gu" value="${esc(GS.u||'')}" placeholder="https://script.google.com/macros/s/.../exec"><label>รหัสผ่านที่ตั้งไว้ในโค้ด</label><input id="gk" type="password" value="${esc(GS.k||'')}"><div class="tb" style="margin-top:8px"><button class="btn" data-a="setgs">บันทึกและเชื่อมต่อ</button>${remote()?'<button class="btn s" data-a="cleargs">ยกเลิกการเชื่อมต่อ</button>':''}</div></div>`}`;
  $('app').innerHTML=h}
 function renderDet(){const R=detR;if(!R){view='sum';render();return}
  const L=v=>R.rl[v],col={pass:'var(--ok)',fail:'var(--no)',na:'var(--na)'};
