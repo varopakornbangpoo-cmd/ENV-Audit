@@ -67,7 +67,8 @@ IT[6]="ภาชนะบรรจุขยะมีอย่างเพีย�
 const DEF=()=>({title:'แบบฟอร์มการตรวจประเมินสิ่งแวดล้อมภายในโรงงาน',sub:'ตรวจเป็นรายแผนก ทุกเดือน — หากข้อใดไม่ผ่าน ให้ระบุรายละเอียดปัญหาพร้อมแนบรูปภาพประกอบในข้อนั้น',noteL:'รายละเอียดปัญหาที่พบ (ภาพรวม)',rl:{pass:'ผ่าน',fail:'ไม่ผ่าน',na:'ไม่เกี่ยวข้อง'},fields:[{l:'วันที่ตรวจ',k:'date'},{l:'แผนก/ฝ่าย',k:'list',o:DEP.slice()},{l:'ผู้ตรวจ',k:'text'},{l:'ผู้รับตรวจ',k:'text'}],items:IT.map(t=>({g:'รายการตรวจประเมินสิ่งแวดล้อม',t}))});
 const KEY='ehs-cfg-v2',KN={text:'ข้อความ',date:'วันที่',list:'เลือกจากรายการ'};
 let cfg,items,note='',edit=false;
-function persist(){try{localStorage.setItem(KEY,JSON.stringify({title:cfg.title,sub:cfg.sub,noteL:cfg.noteL,rl:cfg.rl,fields:cfg.fields.map(f=>({l:f.l,k:f.k,o:f.o})),items:items.map(i=>({g:i.g,t:i.t}))}))}catch(e){}}
+const serCfg=()=>({title:cfg.title,sub:cfg.sub,noteL:cfg.noteL,rl:cfg.rl,fields:cfg.fields.map(f=>({l:f.l,k:f.k,o:f.o})),items:items.map(i=>({g:i.g,t:i.t}))});
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(serCfg()))}catch(e){}pushCfg()}
 function init(reset){let c=null;if(!reset){try{c=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}}
  cfg=c&&c.fields&&c.items&&c.items.length&&c.rl?c:DEF();
  cfg.fields.forEach(f=>{f.v=f.k==='date'?TODAY:''});
@@ -77,7 +78,7 @@ function render(){
  $('bar').style.display=view!=='audit'?'none':'flex';if(view!=='audit'){renderSum();return}
  let h=tabs()+`<div class="tb"><button class="btn ${edit?'':'s'}" data-a="edit">${edit?'✔ เสร็จสิ้นการแก้ไข':'✏️ แก้ไขแบบฟอร์ม (ทุกส่วน)'}</button>${edit?'<button class="btn s" data-a="reset">คืนค่าเดิมทั้งหมด</button>':''}</div>`;
  if(edit){
-  h+=`<div class="card"><label>ชื่อแบบฟอร์ม</label><input data-c="title" value="${esc(cfg.title)}"><label>คำอธิบายใต้ชื่อ</label><textarea rows="2" data-c="sub">${esc(cfg.sub)}</textarea></div><h2>ช่องข้อมูลส่วนหัว</h2>`;
+  h+=`<p class="sub">${remote()?'การแก้ไขแบบฟอร์มจะบันทึกขึ้นส่วนกลาง — เครื่องอื่นจะเห็นแบบฟอร์มเดียวกันเมื่อเปิดหน้าใหม่หรือสลับมาแท็บ ตรวจ':'การแก้ไขจะจำไว้ในเครื่องนี้เท่านั้น (เชื่อม Google Sheet เพื่อใช้ร่วมกันทุกเครื่อง)'}</p><div class="card"><label>ชื่อแบบฟอร์ม</label><input data-c="title" value="${esc(cfg.title)}"><label>คำอธิบายใต้ชื่อ</label><textarea rows="2" data-c="sub">${esc(cfg.sub)}</textarea></div><h2>ช่องข้อมูลส่วนหัว</h2>`;
   cfg.fields.forEach((f,i)=>{h+=`<div class="card"><label>ชื่อช่อง</label><input data-fl="${i}" value="${esc(f.l)}"><label>ชนิดช่อง</label><select data-fk="${i}">${Object.keys(KN).map(k=>`<option value="${k}" ${f.k===k?'selected':''}>${KN[k]}</option>`).join('')}</select>${f.k==='list'?`<label>ตัวเลือก (บรรทัดละ 1 รายการ)</label><textarea rows="5" data-fo="${i}">${esc((f.o||[]).join('\n'))}</textarea>`:''}<div class="rs"><button data-a="fmv" data-i="${i}" data-d="-1">↑ ขึ้น</button><button data-a="fmv" data-i="${i}" data-d="1">↓ ลง</button><button data-a="fdl" data-i="${i}" style="color:var(--no)">🗑 ลบช่อง</button></div></div>`});
   h+=`<button class="btn s" data-a="addf" style="margin-bottom:12px">+ เพิ่มช่องข้อมูลส่วนหัว</button><div class="card"><label>ชื่อปุ่มผลการตรวจ (ผ่าน / ไม่ผ่าน / ไม่เกี่ยวข้อง)</label><div class="g"><input data-rl="pass" value="${esc(cfg.rl.pass)}"><input data-rl="fail" value="${esc(cfg.rl.fail)}"><input data-rl="na" value="${esc(cfg.rl.na)}"></div><label>ชื่อช่องสรุปท้ายฟอร์ม</label><input data-c="noteL" value="${esc(cfg.noteL)}"></div><h2>หมวดและหัวข้อตรวจ</h2>`;
  }else{
@@ -103,7 +104,7 @@ function shrink(file){return new Promise(r=>{const im=new Image(),u=URL.createOb
 const NEW=g=>({g,t:'หัวข้อตรวจใหม่',v:'',n:'',p:[]});
 $('app').addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b||!b.dataset.a)return;const d=b.dataset,i=+d.i,a=d.a;
- if(a==='tab'){view=d.v;edit=false;render();if(view==='sum')loadAll();return}
+ if(a==='tab'){view=d.v;edit=false;render();if(view==='sum')loadAll();else syncCfg();return}
  if(a==='xsum'){xsum();return}
  if(a==='reload'){loadAll();return}
  if(a==='back'){view='sum';render();return}
@@ -114,7 +115,7 @@ $('app').addEventListener('click',e=>{
  if(a==='pdr'){pdfOf(detR);return}
  if(a==='delrec'){if(confirm('ลบผลการตรวจครั้งนี้ออกจากระบบถาวร (รวมรูป)?'))delRec(d.id);return}
  if(a==='edit'){edit=!edit;render();return}
- if(a==='reset'){if(confirm('คืนชื่อฟอร์ม ช่องส่วนหัว และหัวข้อทั้งหมดเป็นแบบเดิม? ข้อมูลที่กรอกไว้จะหาย')){try{localStorage.removeItem(KEY)}catch(x){}init(true)}return}
+ if(a==='reset'){if(confirm('คืนชื่อฟอร์ม ช่องส่วนหัว และหัวข้อทั้งหมดเป็นแบบเดิม? ข้อมูลที่กรอกไว้จะหาย')){try{localStorage.removeItem(KEY)}catch(x){}init(true);pushCfg()}return}
  if(a==='res'){items[i].v=items[i].v===d.v?'':d.v;render();return}
  if(a==='rp'){items[i].p.splice(+d.j,1);render();return}
  if(a==='ag'){items.push(NEW('หมวดใหม่'))}
@@ -169,13 +170,23 @@ let _db;const mem=new Map();
 const idb=()=>_db||(_db=new Promise((res,rej)=>{const r=indexedDB.open('ehs-audit',1);r.onupgradeneeded=()=>r.result.createObjectStore('audits',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
 async function LS(op,arg){try{const d=await idb();return await new Promise((res,rej)=>{const t=d.transaction('audits',op==='all'||op==='get'?'readonly':'readwrite'),st=t.objectStore('audits'),q=op==='put'?st.put(arg):op==='del'?st.delete(arg):op==='get'?st.get(arg):st.getAll();t.oncomplete=()=>res(q.result);t.onerror=t.onabort=()=>rej(t.error)})}catch(e){if(op==='put')mem.set(arg.id,arg);else if(op==='del')mem.delete(arg);else if(op==='get')return mem.get(arg);else return [...mem.values()]}}
 /* ---- Google Apps Script ---- */
-async function gget(q){const r=await fetch(`${GS.u}?k=${encodeURIComponent(GS.k||'')}&${q}`),j=await r.json();if(j.error)throw new Error(j.error);return j}
-async function gpost(o){const r=await fetch(GS.u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...o,k:GS.k||''})}),j=await r.json();if(j.error)throw new Error(j.error);return j}
+function chkU(){const u=String(GS.u||'').trim();GS.u=u;
+ if(!/^https:\/\//.test(u)||/วาง|ตรงนี้/.test(u))throw new Error('ค่า URL ยังไม่ถูกต้อง (ยังเป็นข้อความตัวอย่างหรือไม่ขึ้นต้นด้วย https://) — ตรวจไฟล์ config.js');
+ if(/docs\.google\.com/.test(u))throw new Error('ลิงก์นี้เป็นลิงก์ของ Google Sheet ไม่ใช่ Web app URL จาก Apps Script');
+ if(/\/dev$/.test(u))throw new Error('URL ลงท้าย /dev (โหมดทดสอบ) ต้องใช้ URL ที่ลงท้าย /exec จากการ Deploy');
+ if(!/\/exec$/.test(u))throw new Error('URL ต้องลงท้ายด้วย /exec (คัดลอกจากหน้า Deploy > Web app)');
+ return u}
+async function gcall(url,opt){let r;
+ try{r=await fetch(url,opt)}catch(e){const u=GS.u;throw new Error('เชื่อมต่อ Apps Script ไม่ได้ (Failed to fetch)\nสาเหตุที่พบบ่อย: Deploy ไม่ได้ตั้ง "Who has access: Anyone", ยังไม่ได้ Deploy เป็น New version หลังแก้โค้ด หรือโค้ดมี error\nURL ที่ใช้: '+u.slice(0,44)+'…'+u.slice(-10))}
+ let j;try{j=await r.json()}catch(e){throw new Error('Apps Script ตอบกลับไม่ใช่ข้อมูลที่ถูกต้อง (HTTP '+r.status+') — ตรวจสิทธิ์ Deploy และโค้ด')}
+ if(j.error)throw new Error(j.error);return j}
+async function gget(q){const u=chkU();return gcall(`${u}?k=${encodeURIComponent(GS.k||'')}&${q}`)}
+async function gpost(o){const u=chkU();return gcall(u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({...o,k:GS.k||''})})}
 function sumRefresh(){const a=document.activeElement;if(view==='sum'&&!(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName)))render()}
 async function loadAll(){busy='กำลังโหลด...';sumRefresh();
  try{if(remote()){const j=await gget('a=list');recs=(j.recs||[]).map(r=>({...r,date:normD(r.date)}));plan=j.plan||{}}
   else{recs=((await LS('all'))||[]).map(sm);try{plan=JSON.parse(localStorage.getItem('ehs-plan')||'{}')}catch(e){plan={}}}}
- catch(e){alert('โหลดข้อมูลไม่สำเร็จ: '+(e.message||e)+(remote()?'\nตรวจสอบ URL / รหัสผ่าน / การตั้งค่า Deploy':''))}
+ catch(e){alert('โหลดข้อมูลไม่สำเร็จ: '+(e.message||e))}
  busy='';sumRefresh()}
 async function putRec(r){try{busy='กำลังบันทึก...';if(remote())await gpost({a:'save',rec:r});else await LS('put',r);recs=recs.filter(q=>q.id!==r.id).concat(sm(r));busy='';return true}catch(e){busy='';alert('บันทึกไม่สำเร็จ: '+(e.message||e));return false}}
 async function delRec(id){try{if(remote())await gpost({a:'del',id});else await LS('del',id);recs=recs.filter(q=>q.id!==id);render()}catch(e){alert('ลบไม่สำเร็จ: '+(e.message||e))}}
@@ -270,5 +281,16 @@ async function pdfOf(R){
 $('bx').onclick=async()=>{if(!chk())return;const R=curRec();await putRec(R);xlsxOf(R,true)};
 $('bp').onclick=async()=>{if(!chk())return;const R=curRec();await putRec(R);pdfOf(R)};
 $('bs').onclick=async()=>{if(!chk())return;const R=curRec();if(R&&await putRec(R)&&confirm('บันทึกผลลงสรุป/ประวัติแล้ว\nต้องการล้างฟอร์มเพื่อตรวจแผนกถัดไปเลยหรือไม่?'))clearForm()};
-init();if(remote())loadAll();
+let pushT,warned=false;
+function pushCfg(){if(!remote())return;clearTimeout(pushT);pushT=setTimeout(()=>{gpost({a:'savecfg',cfg:serCfg()}).catch(e=>{if(!warned){warned=true;alert('บันทึกแบบฟอร์มขึ้นส่วนกลางไม่สำเร็จ: '+(e.message||e)+'\n(ถ้าเพิ่งอัปเดตโค้ด Apps Script ต้อง Deploy เป็น New version)')}})},1200)}
+const noData=()=>!items.some(i=>i.v||i.n||i.p.length)&&cfg.fields.every(f=>f.k==='date'||!String(f.v||'').trim())&&!note.trim();
+async function syncCfg(){if(!remote()||edit||!noData())return;
+ try{const j=await gget('a=cfg'),c=j.cfg;
+  if(c&&c.fields&&c.items&&c.items.length&&c.rl&&!edit&&noData()){
+   cfg={title:c.title,sub:c.sub,noteL:c.noteL,rl:c.rl,fields:c.fields.map(f=>({l:f.l,k:f.k,o:f.o,v:f.k==='date'?TODAY:''}))};
+   items=c.items.map(x=>({g:x.g,t:x.t,v:'',n:'',p:[]}));
+   try{localStorage.setItem(KEY,JSON.stringify(serCfg()))}catch(e){}
+   if(view==='audit')render()}
+  else if(!c)pushCfg()}catch(e){}}
+init();if(remote()){loadAll();syncCfg()}
 </script></body></html>
